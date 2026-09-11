@@ -1,0 +1,8 @@
+
+== plant_simulator (STM32F407xx) ==
+   text	   data	    bss	    dec	    hex	filename
+  16080	     24	   2816	  18920	   49e8	build/plant_simulator/plant_simulator.elf
+
+== controller (STM32F401xE) ==
+   text	   data	    bss	    dec	    hex	filename
+  11480	     16	   2264	  13760	   35c0	build/controller/controller.elf
