@@ -1,0 +1,8 @@
+
+  Plant  G(s) = 25.0 / (s^2 + 7.50 s + 25.0)   wn = 5.00 rad/s  zeta = 0.750   Ts = 50 ms  ode4
+  ------------------------------------------------------------------
+  step    max|code-model| = 2.59e-05 V   rms = 4.00e-06 V   (MCU-read Y: 2.15e-03 V)
+  chirp   max|code-model| = 4.52e-04 V   rms = 1.43e-04 V   (MCU-read Y: 2.53e-03 V)
+  closed  max|y - scipy ref| = 6.51e-02 V   steady-state error = 5.50e-05 V
+  tolerance 1e-03 V  ->  VERDICT: PASS
+

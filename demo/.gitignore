@@ -1,0 +1,3 @@
+host_harness/build/
+firmware/build/
+out/*.csv
