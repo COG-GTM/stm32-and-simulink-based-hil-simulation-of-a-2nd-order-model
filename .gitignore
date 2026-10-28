@@ -9,3 +9,6 @@ Release/
 .cproject
 .project
 .mxproject
+
+# Host SIL outputs
+sil/out/
