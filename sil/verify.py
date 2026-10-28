@@ -112,7 +112,8 @@ def main():
         checks.append({"check": name, "value": value, "limit": limit, "pass": bool(ok)})
 
     # 1. Traceability: constants in generated C == model / parameter scripts.
-    pc, cc, rc = c_constants(args.plant_c), c_constants(args.ctrl_c), c_constants(args.ref_c)
+    pc, cc = c_constants(args.plant_c), c_constants(args.ctrl_c)
+    rc = [float(x) for x in re.findall(r"\d+\.\d+", Path(args.ref_c).read_text())]
     rel = lambda a, b: abs(a - b) / abs(b)  # noqa: E731
     check("Plant TF uses SystemParameters.m (slx)", f"{plant_blk['Numerator']} / {plant_blk['Denominator']}",
           "[num] / [den]", plant_blk["Numerator"] == "[num]" and plant_blk["Denominator"] == "[den]")
@@ -122,6 +123,9 @@ def main():
     for label, want, consts in [("Kp", kp, cc), ("Ki", ki, cc)]:
         err = min(rel(v, want) for v in consts)
         check(f"C PI {label} = {want:.6g} (slx)", f"{err:.1e}", TOL["gain_rel"], err <= TOL["gain_rel"])
+    for label, want in [("pulse amplitude", float(pulse["Amplitude"])), ("constant", float(const["Value"]))]:
+        err = min(rel(v, want) for v in rc)
+        check(f"C reference {label} = {want:g} (slx)", f"{err:.1e}", TOL["gain_rel"], err <= TOL["gain_rel"])
     err = min(rel(v, ts / 2) for v in cc)
     check(f"C trapezoidal Ts/2 = {ts / 2:g} ({ctrl.get('IntegratorMethod')})", f"{err:.1e}",
           TOL["gain_rel"], err <= TOL["gain_rel"])
