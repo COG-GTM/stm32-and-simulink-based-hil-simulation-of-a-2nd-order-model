@@ -27,6 +27,8 @@ PWM_VMAX = 3.33  # VOLT_REF in both main.c files
 
 TOL = {
     "open_loop_max_err_V": 1e-3,
+    "open_loop_outport_transient_V": 5e-3,  # ode4 stage-4 predictor bias, ~2.2 mV
+    "open_loop_outport_steady_V": 1e-4,
     "closed_loop_max_err_V": 5e-3,
     "rise_time_s": 0.05,
     "settling_time_s": 0.05,
@@ -136,8 +138,14 @@ def main():
     _, y_an = control.step_response(control.tf([num], den), T=t_ol)
     ol_err = float(np.max(np.abs(ol["y_state"] - y_an)))
     ol_err_out = float(np.max(np.abs(ol["y"] - y_an)))
+    steady = t_ol >= 4.0
+    ol_err_ss = float(np.max(np.abs(ol["y"][steady] - y_an[steady])))
     check("Open-loop max |SIL - analytic| (state)", f"{ol_err:.2e} V", TOL["open_loop_max_err_V"],
           ol_err <= TOL["open_loop_max_err_V"])
+    check("Open-loop max |outport y - analytic| (transient)", f"{ol_err_out:.2e} V",
+          TOL["open_loop_outport_transient_V"], ol_err_out <= TOL["open_loop_outport_transient_V"])
+    check("Open-loop |outport y - analytic| (steady, t >= 4 s)", f"{ol_err_ss:.2e} V",
+          TOL["open_loop_outport_steady_V"], ol_err_ss <= TOL["open_loop_outport_steady_V"])
     m_an = step_metrics(t_ol, y_an, 0.0, 1.0)
     m_ol = step_metrics(t_ol, ol["y_state"], 0.0, 1.0)
 
@@ -170,7 +178,8 @@ def main():
     results = {"verdict": verdict, "passed": n_pass, "total": len(checks), "checks": checks,
                "params": p, "slx": {"Kp": kp, "Ki": ki, "Ts": ts},
                "open_loop": {"analytic": m_an, "sil": m_ol, "max_err_V": ol_err,
-                             "max_err_outport_V": ol_err_out},
+                             "max_err_outport_V": ol_err_out,
+                             "steady_err_outport_V": ol_err_ss},
                "closed_loop": {"sil": m_sil, "mil": m_mil, "max_err_V": cl_err}}
 
     # ---- plots -----------------------------------------------------------
